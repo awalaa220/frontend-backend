@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: awalaa220/backend
+        ports:
+        - containerPort: 3001
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-3
+spec:
+  type: NodePort
+  selector:
+    app: backend
+  ports:
+    - port: 3001
+
+      targetPort: 3001
+
+      nodePort: 30009
+

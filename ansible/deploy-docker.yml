@@ -1,0 +1,20 @@
+- name: deploy app using docker
+  hosts: local
+  vars:
+    container_frontendimage: awalaa220/frontend
+    container_backendimage: awalaa220/backend 
+  tasks:
+    - name: deploy frontend container
+      community.docker.docker_container:
+        name: frontend
+        image: "{{ container_frontendimage}}"
+        state: started
+        ports:
+          - "30008:3000"
+    - name: deploy backend container
+      community.docker.docker_container:
+        name: backend
+        image: "{{container_backendimage}}"
+        state: started
+        ports:
+          - "30009:3001"
