@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('build') {
+            steps {
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/awalaa220/frontend-backend.git'
+                dir('backend') {
+    sh "docker build -t awalaa220/backend1:$BUILD_NUMBER . "
+}
+                 dir('frontend') {
+    sh "docker build -t awalaa220/frontend1:$BUILD_NUMBER . "
+}
+    withCredentials([usernamePassword(credentialsId: 'dockerhup', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+    sh "docker login -u $USER -p $PASS"
+    sh "docker push awalaa220/backend1:$BUILD_NUMBER "
+    sh "docker push awalaa220/frontend1:$BUILD_NUMBER "
+
+}
+            }
+        }
+        stage('Free Ports') {
+    steps {
+        sh '''
+        for PORT in 30008 30009; do
+          PID=$(lsof -t -i:$PORT || true)
+          if [ -n "$PID" ]; then
+            echo "Killing process on port $PORT (PID=$PID)"
+            kill -9 $PID
+          else
+            echo "No process using port $PORT"
+          fi
+        done
+        '''
+    }
+}
+        stage('deploy'){
+            steps {
+            sh "sed -i 's|image:.*|image: awalaa220/backend1:$BUILD_NUMBER|' k8s/backend.yml"
+            sh "sed -i 's|image:.*|image: awalaa220/frontend1:$BUILD_NUMBER|' k8s/frontend.yml"
+            sh "kubectl apply -f k8s/backend.yml --validate=false && kubectl apply -f k8s/frontend.yml --validate=false"
+            }
+        }
+
+        }
+}
+
