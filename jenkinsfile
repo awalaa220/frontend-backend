@@ -4,7 +4,6 @@ pipeline {
     stages {
         stage('build') {
             steps {
-                git branch: 'main', credentialsId: 'github', url: 'https://github.com/awalaa220/frontend-backend.git'
                 dir('backend') {
     sh "docker build -t awalaa220/backend1:$BUILD_NUMBER . "
 }
